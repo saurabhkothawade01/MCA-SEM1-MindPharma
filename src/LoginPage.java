@@ -16,20 +16,26 @@ public class LoginPage extends JFrame {
     private JPasswordField passwordField;
 
     public LoginPage() {
+
         setTitle("MindPharma");
         setExtendedState(JFrame.MAXIMIZED_BOTH); // Opens the window maximized
-        //setUndecorated(true); // Removes window decorations (title bar, close, minimize, maximize buttons)
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         // Main content panel
-         JPanel mainPanel = new JPanel(new BorderLayout());
-         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); // Add some padding
- 
-         // Registration form panel
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20)); // Add some padding
+
+        // Registration form panel
         JPanel panel = new JPanel(new GridBagLayout());
-        Border titledBorder = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),"MindPharma - Your Path to Mental Wellness");
+        Border titledBorder = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 5),
+                "MindPharma - Your Path to Mental Wellness  ");
         ((TitledBorder) titledBorder).setTitleFont(new Font("Arial", Font.BOLD, 18)); // Set font, style, and size
-        panel.setBorder(BorderFactory.createCompoundBorder(titledBorder, BorderFactory.createEmptyBorder(10, 10, 10, 10))); // Add a titled border
+        panel.setBorder(
+                BorderFactory.createCompoundBorder(titledBorder, BorderFactory.createEmptyBorder(10, 10, 10, 10))); // Add
+                                                                                                                    // a
+                                                                                                                    // titled
+                                                                                                                    // border
+
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.insets = new Insets(10, 10, 10, 10);
 
@@ -79,16 +85,16 @@ public class LoginPage extends JFrame {
         constraints.gridwidth = 2;
         constraints.anchor = GridBagConstraints.CENTER;
         panel.add(registerButton, constraints);
-    
-            registerButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    // Open the login window
-                    RegistrationPage registrationPage = new RegistrationPage();
-                    registrationPage.setVisible(true);
-                    LoginPage.this.dispose(); // Close the registration window
-                }
-            });
+
+        registerButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Open the login window
+                RegistrationPage registrationPage = new RegistrationPage();
+                registrationPage.setVisible(true);
+                LoginPage.this.dispose(); // Close the registration window
+            }
+        });
 
         loginButton.addActionListener(new ActionListener() {
             @Override
@@ -98,7 +104,8 @@ public class LoginPage extends JFrame {
 
                 // Validate that username, password, and confirm password are not empty
                 if (username.isEmpty() || password.isEmpty()) {
-                    JOptionPane.showMessageDialog(LoginPage.this, "Please entered all fields.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(LoginPage.this, "Please entered all fields.", "Error",
+                            JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
@@ -109,27 +116,25 @@ public class LoginPage extends JFrame {
                     mainDashboard.setVisible(true);
                     LoginPage.this.dispose();
                 } else {
-                    JOptionPane.showMessageDialog(LoginPage.this, "Invalid username or password. Please try again.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(LoginPage.this, "Invalid username or password. Please try again.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
 
-      mainPanel.add(panel, BorderLayout.CENTER);
-      add(mainPanel);
-      setPreferredSize(Toolkit.getDefaultToolkit().getScreenSize());
-      //pack();
-      setLocationRelativeTo(null); // Center the registration window on the screen
+        mainPanel.add(panel, BorderLayout.CENTER);
+        add(mainPanel);
+        setPreferredSize(Toolkit.getDefaultToolkit().getScreenSize());
+        setLocationRelativeTo(null); // Center the registration window on the screen
     }
-
 
     // Getter for the logged-in username
     public static String getLoggedInUsername() {
         return loggedInUsername;
     }
 
-
     private boolean validateLogin(String username, String password) {
-        // Perform database validation here (replace the following code with actual database connection)
+        // Perform database validation here
         String jdbcUrl = "jdbc:mysql://localhost:3306/mindpharma";
         String dbUsername = "root";
         String dbPassword = "saurabh";
@@ -142,7 +147,7 @@ public class LoginPage extends JFrame {
             preparedStatement.setString(2, password);
             ResultSet resultSet = preparedStatement.executeQuery();
 
-            loggedInUsername = username; 
+            loggedInUsername = username;
 
             return resultSet.next(); // If there is a match, login is successful
         } catch (Exception e) {

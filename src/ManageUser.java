@@ -24,6 +24,7 @@ public class ManageUser extends JFrame {
     private JLabel photoLabel;
 
     public ManageUser(String username) {
+
         setTitle("MindPharma");
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -34,16 +35,17 @@ public class ManageUser extends JFrame {
 
         // User information panel
         JPanel panel = new JPanel(new GridBagLayout());
-        Border userBorder = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
-                "MindPharma - User Information");
+        Border userBorder = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 5),
+                "MindPharma - User Information  ");
         ((TitledBorder) userBorder).setTitleFont(new Font("Arial", Font.BOLD, 18));
-        panel.setBorder(BorderFactory.createCompoundBorder(userBorder, BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-        GridBagConstraints constraints = new GridBagConstraints();
+        panel.setBorder(
+                BorderFactory.createCompoundBorder(userBorder, BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+        
+                GridBagConstraints constraints = new GridBagConstraints();
         constraints.insets = new Insets(10, 10, 10, 10);
 
         // Fetch user information from the database based on the username
         UserData userData = getUserData(username);
-
 
         // Username label and field (non-editable)
         JLabel usernameLabel = new JLabel("Username:");
@@ -150,7 +152,8 @@ public class ManageUser extends JFrame {
                     MainDashboard mainDashboard = new MainDashboard();
                     mainDashboard.setVisible(true); // Show the Main Dashboard
                 } else {
-                    JOptionPane.showMessageDialog(ManageUser.this, "Failed to update user information.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(ManageUser.this, "Failed to update user information.", "Error",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -170,17 +173,18 @@ public class ManageUser extends JFrame {
         constraints.anchor = GridBagConstraints.CENTER;
         panel.add(saveButton, constraints);
 
-        constraints.gridx =2;
+        constraints.gridx = 2;
         constraints.gridy = 8;
         constraints.anchor = GridBagConstraints.CENTER;
         panel.add(cancelButton, constraints);
 
         // Photo panel
         JPanel photoPanel = new JPanel(new BorderLayout());
-        Border photoBorder = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
-                "MindPharma - User Photo");
+        Border photoBorder = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 5),
+                "MindPharma - User Photo  ");
         ((TitledBorder) photoBorder).setTitleFont(new Font("Arial", Font.BOLD, 18));
-        photoPanel.setBorder(BorderFactory.createCompoundBorder(photoBorder, BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+        photoPanel.setBorder(
+                BorderFactory.createCompoundBorder(photoBorder, BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 
         // Photo label (You can replace this with an actual image)
         photoLabel = new JLabel("User Photo Placeholder", SwingConstants.CENTER);
@@ -190,21 +194,16 @@ public class ManageUser extends JFrame {
         photoLabel.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 try {
-                  loadAndDisplayImage();
-            } catch (SQLException e) {
-                  // TODO Auto-generated catch block
-                  e.printStackTrace();
-            }
+                    loadAndDisplayImage();
+                } catch (SQLException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         });
 
-        // try {
-        //     loadAndDisplayImage(); // This method is used for loading image from file
-            displayUserImageFromDatabase(); // New method for displaying image from the database
-        // } catch (SQLException e) {
-        //     e.printStackTrace();
-        // }
-
+        displayUserImageFromDatabase(); // New method for displaying image from the database
+  
         photoPanel.add(photoLabel, BorderLayout.CENTER);
 
         // Adding user and photo panels to the main panel
@@ -217,124 +216,125 @@ public class ManageUser extends JFrame {
     }
 
     private void loadAndDisplayImage() throws SQLException {
-      JFileChooser fileChooser = new JFileChooser();
-      int result = fileChooser.showOpenDialog(this);
-  
-      if (result == JFileChooser.APPROVE_OPTION) {
-          File selectedFile = fileChooser.getSelectedFile();
-          try {
-              // Save the image to the database
-              saveImageToDatabase(selectedFile);
-  
-              // Display the selected image with a border
-              int targetWidth = 500; // Set the desired width
-              int targetHeight = 500; // Set the desired height
-  
-              ImageIcon originalIcon = new ImageIcon(selectedFile.getAbsolutePath());
-              Image originalImage = originalIcon.getImage();
-  
-              // Scale the image to fit within the specified dimensions
-              Image scaledImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
-              ImageIcon scaledIcon = new ImageIcon(scaledImage);
-  
-              // Create a JPanel to contain the JLabel with a border
-              JPanel imagePanel = new JPanel(null); // Set the layout to null for absolute positioning
-  
-              // Convert 2cm to pixels (assuming 1 inch = 2.54 cm and using a standard DPI of 96)
-              int borderSize = (int) (2 * Toolkit.getDefaultToolkit().getScreenResolution() / 2.54);
-  
-              imagePanel.setBorder(BorderFactory.createEmptyBorder(borderSize, borderSize, borderSize, borderSize));
-  
-              // Create a JLabel to display the image
-              JLabel imageLabel = new JLabel(scaledIcon);
-  
-              // Calculate the position to center the image within the JPanel
-              int x = (targetWidth - scaledIcon.getIconWidth()) / 2 + borderSize;
-              int y = (targetHeight - scaledIcon.getIconHeight()) / 2 + borderSize;
-  
-              // Set the bounds of the imageLabel within the imagePanel
-              imageLabel.setBounds(x, y, scaledIcon.getIconWidth(), scaledIcon.getIconHeight());
-  
-              // Add the JLabel to the JPanel
-              imagePanel.add(imageLabel);
-  
-              // Set the layout of photoLabel to null to allow absolute positioning
-              photoLabel.setLayout(null);
-  
-              // Calculate the position to center the imagePanel within the photoLabel
-              int panelX = (photoLabel.getWidth() - targetWidth - 2 * borderSize) / 2;
-              int panelY = (photoLabel.getHeight() - targetHeight - 2 * borderSize) / 2;
-  
-              // Set the bounds of the imagePanel within the photoLabel
-              imagePanel.setBounds(panelX, panelY, targetWidth + 2 * borderSize, targetHeight + 2 * borderSize);
-  
-              // Add the imagePanel to the photoLabel
-              photoLabel.removeAll(); // Clear previous components
-              photoLabel.add(imagePanel);
-  
-              // Refresh the UI
-              photoLabel.revalidate();
-              photoLabel.repaint();
-          } catch (IOException e) {
-              e.printStackTrace();
-              JOptionPane.showMessageDialog(this, "Error loading image.", "Error", JOptionPane.ERROR_MESSAGE);
-          }
-      }
-  }
+        JFileChooser fileChooser = new JFileChooser();
+        int result = fileChooser.showOpenDialog(this);
 
-  private void displayUserImageFromDatabase() {
-    try {
-        // Retrieve user's image from the database based on the username
-        byte[] imageData = getUserImageFromDatabase(usernameField.getText());
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            try {
+                // Save the image to the database
+                saveImageToDatabase(selectedFile);
 
-        if (imageData != null) {
-            // Convert byte array to Image
-            Image image = new ImageIcon(imageData).getImage();
+                // Display the selected image with a border
+                int targetWidth = 500; // Set the desired width
+                int targetHeight = 500; // Set the desired height
 
-            // Resize the image to 500x500
-            int targetWidth = 500;
-            int targetHeight = 500;
-            Image scaledImage = image.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
+                ImageIcon originalIcon = new ImageIcon(selectedFile.getAbsolutePath());
+                Image originalImage = originalIcon.getImage();
 
-            // Create an ImageIcon from the scaled image
-            ImageIcon resizedImageIcon = new ImageIcon(scaledImage);
+                // Scale the image to fit within the specified dimensions
+                Image scaledImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
+                ImageIcon scaledIcon = new ImageIcon(scaledImage);
 
-            // Display the resized image
-            photoLabel.setIcon(resizedImageIcon);
-        } else {
-            // Handle the case where the user has no image in the database
-            System.out.println("User has no image in the database.");
-        }
-    } catch (SQLException e) {
-        e.printStackTrace();
-        // Handle database-related errors
-    }
-}
+                // Create a JPanel to contain the JLabel with a border
+                JPanel imagePanel = new JPanel(null); // Set the layout to null for absolute positioning
 
+                // Convert 2cm to pixels (assuming 1 inch = 2.54 cm and using a standard DPI of
+                // 96)
+                int borderSize = (int) (2 * Toolkit.getDefaultToolkit().getScreenResolution() / 2.54);
 
-  // Method to retrieve user's image from the database
-  private byte[] getUserImageFromDatabase(String username) throws SQLException {
-    String jdbcUrl = "jdbc:mysql://localhost:3306/mindpharma";
-    String dbUsername = "root";
-    String dbPassword = "saurabh";
+                imagePanel.setBorder(BorderFactory.createEmptyBorder(borderSize, borderSize, borderSize, borderSize));
 
-    try (Connection connection = DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword)) {
-        String query = "SELECT photo FROM user WHERE username = ?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, username);
-            try (ResultSet resultSet = preparedStatement.executeQuery()) {
-                if (resultSet.next()) {
-                    // Get the image data from the result set
-                    return resultSet.getBytes("photo");
-                }
+                // Create a JLabel to display the image
+                JLabel imageLabel = new JLabel(scaledIcon);
+
+                // Calculate the position to center the image within the JPanel
+                int x = (targetWidth - scaledIcon.getIconWidth()) / 2 + borderSize;
+                int y = (targetHeight - scaledIcon.getIconHeight()) / 2 + borderSize;
+
+                // Set the bounds of the imageLabel within the imagePanel
+                imageLabel.setBounds(x, y, scaledIcon.getIconWidth(), scaledIcon.getIconHeight());
+
+                // Add the JLabel to the JPanel
+                imagePanel.add(imageLabel);
+
+                // Set the layout of photoLabel to null to allow absolute positioning
+                photoLabel.setLayout(null);
+
+                // Calculate the position to center the imagePanel within the photoLabel
+                int panelX = (photoLabel.getWidth() - targetWidth - 2 * borderSize) / 2;
+                int panelY = (photoLabel.getHeight() - targetHeight - 2 * borderSize) / 2;
+
+                // Set the bounds of the imagePanel within the photoLabel
+                imagePanel.setBounds(panelX, panelY, targetWidth + 2 * borderSize, targetHeight + 2 * borderSize);
+
+                // Add the imagePanel to the photoLabel
+                photoLabel.removeAll(); // Clear previous components
+                photoLabel.add(imagePanel);
+
+                // Refresh the UI
+                photoLabel.revalidate();
+                photoLabel.repaint();
+            } catch (IOException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Error loading image.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
 
-    return null; // Return null if the user has no image in the database
-}
-  
-    // Method to save an image to the database (placeholder, you need to modify this based on your database schema)
+    private void displayUserImageFromDatabase() {
+        try {
+            // Retrieve user's image from the database based on the username
+            byte[] imageData = getUserImageFromDatabase(usernameField.getText());
+
+            if (imageData != null) {
+                // Convert byte array to Image
+                Image image = new ImageIcon(imageData).getImage();
+
+                // Resize the image to 500x500
+                int targetWidth = 500;
+                int targetHeight = 500;
+                Image scaledImage = image.getScaledInstance(targetWidth, targetHeight, Image.SCALE_SMOOTH);
+
+                // Create an ImageIcon from the scaled image
+                ImageIcon resizedImageIcon = new ImageIcon(scaledImage);
+
+                // Display the resized image
+                photoLabel.setIcon(resizedImageIcon);
+            } else {
+                // Handle the case where the user has no image in the database
+                System.out.println("User has no image in the database.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // Handle database-related errors
+        }
+    }
+
+    // Method to retrieve user's image from the database
+    private byte[] getUserImageFromDatabase(String username) throws SQLException {
+        String jdbcUrl = "jdbc:mysql://localhost:3306/mindpharma";
+        String dbUsername = "root";
+        String dbPassword = "saurabh";
+
+        try (Connection connection = DriverManager.getConnection(jdbcUrl, dbUsername, dbPassword)) {
+            String query = "SELECT photo FROM user WHERE username = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                preparedStatement.setString(1, username);
+                try (ResultSet resultSet = preparedStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        // Get the image data from the result set
+                        return resultSet.getBytes("photo");
+                    }
+                }
+            }
+        }
+
+        return null; // Return null if the user has no image in the database
+    }
+
+    // Method to save an image to the database (placeholder, you need to modify this
+    // based on your database schema)
     private void saveImageToDatabase(File file) throws IOException, SQLException {
         // Replace this with your database connection and insert query
         String jdbcUrl = "jdbc:mysql://localhost:3306/mindpharma";
@@ -377,7 +377,8 @@ public class ManageUser extends JFrame {
                 String fetchedDob = resultSet.getString("dob");
                 String fetchedGender = resultSet.getString("gender");
 
-                return new UserData(fetchedUsername, fetchedEmail, fetchedPassword, fetchedContactNumber, fetchedAddress, fetchedDob, fetchedGender);
+                return new UserData(fetchedUsername, fetchedEmail, fetchedPassword, fetchedContactNumber,
+                        fetchedAddress, fetchedDob, fetchedGender);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -387,7 +388,8 @@ public class ManageUser extends JFrame {
     }
 
     // Method to update user data in the database
-    private boolean updateUser(String username, String email, String password, String contactNumber, String address, String dob, String gender) {
+    private boolean updateUser(String username, String email, String password, String contactNumber, String address,
+            String dob, String gender) {
         // Replace this with your database connection and update query
         // The following is just a placeholder, you should use PreparedStatement
         String jdbcUrl = "jdbc:mysql://localhost:3306/mindpharma";
@@ -438,7 +440,8 @@ class UserData {
     private String dob;
     private String gender;
 
-    public UserData(String username, String email, String password, String contactNumber, String address, String dob, String gender) {
+    public UserData(String username, String email, String password, String contactNumber, String address, String dob,
+            String gender) {
         this.username = username;
         this.email = email;
         this.password = password;

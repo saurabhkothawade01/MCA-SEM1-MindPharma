@@ -36,8 +36,8 @@ public class RegistrationPage extends JFrame {
 
         // Registration form panel
         JPanel panel = new JPanel(new GridBagLayout());
-        Border titledBorder = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
-                "MindPharma - Your Path to Mental Wellness");
+        Border titledBorder = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 5),
+                "MindPharma - Your Path to Mental Wellness  ");
         ((TitledBorder) titledBorder).setTitleFont(new Font("Arial", Font.BOLD, 18)); // Set font, style, and size
         panel.setBorder(
                 BorderFactory.createCompoundBorder(titledBorder, BorderFactory.createEmptyBorder(10, 10, 10, 10))); // Add
@@ -160,8 +160,6 @@ public class RegistrationPage extends JFrame {
         constraints.gridy = 9;
         panel.add(genderComboBox, constraints);
 
-        mainPanel.add(panel, BorderLayout.CENTER);
-
         JButton registerButton = new JButton("Register");
         constraints.gridx = 0;
         constraints.gridy = 10;
@@ -189,7 +187,7 @@ public class RegistrationPage extends JFrame {
                     return;
                 }
 
-                // Convert the date format from 'MM/dd/yyyy' to 'yyyy-MM-dd'
+                // Convert the date format from 'dd/MM/yyyy' to 'yyyy-MM-dd'
                 SimpleDateFormat inputFormat = new SimpleDateFormat("dd/MM/yyyy");
                 SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd");
                 Date dob = null;
@@ -210,7 +208,6 @@ public class RegistrationPage extends JFrame {
                 if (password.equals(confirmPassword)) {
                     if (registerUser(username, password, name, email, contactNumber, address, formattedDob, gender)) {
                         JOptionPane.showMessageDialog(RegistrationPage.this, "Registration Successful!");
-                        // You can perform additional actions after successful registration
                         // Clear all text fields
                         usernameField.setText("");
                         passwordField.setText("");
@@ -253,6 +250,7 @@ public class RegistrationPage extends JFrame {
             }
         });
 
+        mainPanel.add(panel, BorderLayout.CENTER);
         add(mainPanel);
         setPreferredSize(Toolkit.getDefaultToolkit().getScreenSize());
         setLocationRelativeTo(null); // Center the registration window on the screen
@@ -265,22 +263,22 @@ public class RegistrationPage extends JFrame {
         if (isUsernameExists(username)) {
             JOptionPane.showMessageDialog(RegistrationPage.this, "Username is already exists.", "Error",
                     JOptionPane.ERROR_MESSAGE);
-            return false; // Registration failed due to existing username or contact number
+            return false; // Registration failed due to existing username
         }
 
         if (isContactNumberExists(contactNumber)) {
             JOptionPane.showMessageDialog(RegistrationPage.this, "Mobile Number is already exists.", "Error",
                     JOptionPane.ERROR_MESSAGE);
-            return false; // Registration failed due to existing username or contact number
+            return false; // Registration failed due to existing contact number
         }
 
         if (isEmailExists(email)) {
             JOptionPane.showMessageDialog(RegistrationPage.this, "Email ID is already exists.", "Error",
                     JOptionPane.ERROR_MESSAGE);
-            return false; // Registration failed due to existing username or contact number
+            return false; // Registration failed due to existing emailid
         }
-        // Perform database registration here (replace the following code with actual
-        // database connection)
+
+        // Perform database registration here
         String jdbcUrl = "jdbc:mysql://localhost:3306/mindpharma";
         String dbUsername = "root";
         String dbPassword = "saurabh";
@@ -363,7 +361,7 @@ public class RegistrationPage extends JFrame {
                 ResultSet resultSet = preparedStatement.executeQuery();
                 if (resultSet.next()) {
                     int count = resultSet.getInt(1);
-                    return count > 0; // Return true if the contact number exists, otherwise false
+                    return count > 0; // Return true if the emailid exists, otherwise false
                 }
             }
         } catch (Exception e) {

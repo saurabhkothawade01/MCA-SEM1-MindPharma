@@ -5,17 +5,16 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
 import java.util.ArrayList;
 
 public class MainDashboard extends JFrame {
 
-      private JLabel imageLabel;
-      private ArrayList<ImageIcon> imageList;
+    private JLabel imageLabel;
+    private ArrayList<ImageIcon> imageList;
     private int currentImageIndex;
-    
 
     public MainDashboard() {
+
         setTitle("MindPharma");
         setExtendedState(JFrame.MAXIMIZED_BOTH);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -25,19 +24,18 @@ public class MainDashboard extends JFrame {
         imageList.add(new ImageIcon("images/b.png"));
         imageList.add(new ImageIcon("images/c.png"));
         imageList.add(new ImageIcon("images/e.png"));
-        // imageList.add(new ImageIcon(getClass().getResource("images/g.png")));
-        // Add more images as needed
-            
+
         // Main content panel
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         // Registration form panel
         JPanel panel = new JPanel(new GridBagLayout());
-        Border titledBorder = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 2),
-                "MindPharma - Your Path to Mental Wellness");
+        Border titledBorder = BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.BLACK, 5),
+                "MindPharma - Your Path to Mental Wellness  ");
         ((TitledBorder) titledBorder).setTitleFont(new Font("Arial", Font.BOLD, 18));
-        panel.setBorder(BorderFactory.createCompoundBorder(titledBorder, BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+        panel.setBorder(
+                BorderFactory.createCompoundBorder(titledBorder, BorderFactory.createEmptyBorder(10, 10, 10, 10)));
 
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.insets = new Insets(10, 10, 10, 10);
@@ -96,7 +94,7 @@ public class MainDashboard extends JFrame {
         reportsButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                
+
                 ReportGenerationWindow reportGenerationWindow = new ReportGenerationWindow();
                 reportGenerationWindow.setVisible(true);
                 MainDashboard.this.dispose();
@@ -109,7 +107,7 @@ public class MainDashboard extends JFrame {
                 String username = LoginPage.getLoggedInUsername();
                 ManageUser manageUser = new ManageUser(username);
                 manageUser.setVisible(true);
-                
+
                 MainDashboard.this.dispose();
             }
         });
@@ -117,7 +115,7 @@ public class MainDashboard extends JFrame {
         medicineButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                
+
                 MedicineDetailsPage medicineDetailsPage = new MedicineDetailsPage();
                 medicineDetailsPage.setVisible(true);
                 MainDashboard.this.dispose();
@@ -133,7 +131,6 @@ public class MainDashboard extends JFrame {
             }
         });
 
-
         salesButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -146,14 +143,12 @@ public class MainDashboard extends JFrame {
         logoutButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int choice = JOptionPane.showConfirmDialog(MainDashboard.this, "Are you sure you want to logout?", "Logout", JOptionPane.YES_NO_OPTION);
+                int choice = JOptionPane.showConfirmDialog(MainDashboard.this, "Are you sure you want to logout?",
+                        "Logout", JOptionPane.YES_NO_OPTION);
                 if (choice == JOptionPane.YES_OPTION) {
-                    // Perform logout actions
-                    // For example, navigate to the login page or clear session information
                     LoginPage loginPage = new LoginPage();
                     loginPage.setVisible(true);
                     MainDashboard.this.dispose();
-                    // Add code to navigate to the login page or perform logout actions
                 }
             }
         });
@@ -163,7 +158,6 @@ public class MainDashboard extends JFrame {
         add(mainPanel);
 
         setPreferredSize(Toolkit.getDefaultToolkit().getScreenSize());
-      //pack();
         setLocationRelativeTo(null);
     }
 
@@ -178,11 +172,11 @@ public class MainDashboard extends JFrame {
     }
 
     private void updateImage() {
-      if (!imageList.isEmpty()) {
-          imageLabel.setIcon(imageList.get(currentImageIndex));
-          currentImageIndex = (currentImageIndex + 1) % imageList.size();
-      }
-  }
+        if (!imageList.isEmpty()) {
+            imageLabel.setIcon(imageList.get(currentImageIndex));
+            currentImageIndex = (currentImageIndex + 1) % imageList.size();
+        }
+    }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
