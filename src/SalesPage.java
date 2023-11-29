@@ -224,6 +224,12 @@ public class SalesPage extends JFrame {
 
         int quantity = Integer.parseInt(quantityStr);
 
+        // Check if there is enough quantity of the selected medicine
+    if (!hasEnoughQuantity(medicine, category, quantity)) {
+        JOptionPane.showMessageDialog(this, "Not enough quantity of " + medicine + " available.", "Error", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
         DefaultTableModel tableModel = (DefaultTableModel) saleTable.getModel();
         tableModel.addRow(new Object[] { medicine, category, quantity });
 
@@ -358,6 +364,31 @@ public class SalesPage extends JFrame {
         categoryComboBox.setSelectedIndex(0);
         medicineComboBox.setSelectedIndex(0);
     }
+
+    private boolean hasEnoughQuantity(String medicine, String category, int quantity) {
+        try (Connection connection = DriverManager.getConnection(JDBC_URL, USERNAME, PASSWORD);
+                PreparedStatement statement = connection.prepareStatement(
+                        "SELECT quantity FROM medicine WHERE medicine_name = ? AND category = ? AND username = ?")) {
+    
+            statement.setString(1, medicine);
+            statement.setString(2, category);
+            statement.setString(3, LoginPage.loggedInUsername);
+    
+            ResultSet resultSet = statement.executeQuery();
+    
+            if (resultSet.next()) {
+                int availableQuantity = resultSet.getInt("quantity");
+                return availableQuantity >= quantity;
+            } else {
+                return false; // Medicine not found
+            }
+    
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false; // Error fetching quantity
+        }
+    }
+    
 
     private void updateDatabaseWithSale(String customerName, String address, String contact,
             DefaultTableModel tableModel, double totalAmount) {
