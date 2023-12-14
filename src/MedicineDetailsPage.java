@@ -2,20 +2,20 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
+import com.toedter.calendar.JDateChooser;
 
 public class MedicineDetailsPage extends JFrame {
 
     private JTable medicineTable;
-    private JTextField idField, medicineNameField, companyNameField, categoryField, quantityField, priceField, expiryDateField;
+    private JTextField idField, medicineNameField, companyNameField, categoryField, quantityField, priceField;
     private JComboBox<String> companyComboBox;
     private JComboBox<String> categoryComboBox;
+    private JDateChooser expiryDateChooser;
 
     private static final String JDBC_URL = "jdbc:mysql://localhost:3306/mindpharma";
     private static final String USERNAME = "root";
@@ -80,7 +80,8 @@ public class MedicineDetailsPage extends JFrame {
         categoryField = new JTextField(15);
         quantityField = new JTextField(10);
         priceField = new JTextField(10);
-        expiryDateField = new JTextField(10);
+        expiryDateChooser = new JDateChooser();
+        expiryDateChooser.setDateFormatString("dd/MM/yyyy");
 
         // Add ListSelectionListener to the table to detect row selection events
         medicineTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -96,7 +97,11 @@ public class MedicineDetailsPage extends JFrame {
                         categoryField.setText(medicineTable.getValueAt(selectedRow, 3).toString());
                         quantityField.setText(medicineTable.getValueAt(selectedRow, 4).toString());
                         priceField.setText(medicineTable.getValueAt(selectedRow, 5).toString());
-                        expiryDateField.setText(medicineTable.getValueAt(selectedRow, 6).toString());
+                        Object expiryDateValue = medicineTable.getValueAt(selectedRow, 6);
+                        if (expiryDateValue instanceof Date) {
+                            expiryDateChooser.setDate((Date) expiryDateValue);
+                        }
+
                     }
                 }
             }
@@ -116,7 +121,7 @@ public class MedicineDetailsPage extends JFrame {
                     addMedicine();
                     refreshTable();
                     clearFields();
-                    generatedId++; 
+                    generatedId++;
                     idField.setText(String.valueOf(generatedId));
                 }
             }
@@ -205,7 +210,8 @@ public class MedicineDetailsPage extends JFrame {
         inputPanel.add(new JLabel("Price Per Unit:"));
         inputPanel.add(priceField);
         inputPanel.add(new JLabel("Expiry Date:"));
-        inputPanel.add(expiryDateField);
+        // inputPanel.add(expiryDateField);
+        inputPanel.add(expiryDateChooser);
 
         // Buttons panel
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -286,7 +292,7 @@ public class MedicineDetailsPage extends JFrame {
         medicineNameField.setText("");
         quantityField.setText("");
         priceField.setText("");
-        expiryDateField.setText("");
+        expiryDateChooser.setDate(null);
     }
 
     private boolean isDuplicateMedicine(String medicineName) {
@@ -309,6 +315,11 @@ public class MedicineDetailsPage extends JFrame {
         String companyName = companyComboBox.getSelectedItem().toString();
         String category = categoryComboBox.getSelectedItem().toString();
 
+        if (medicineName.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a medicine name.", "Error", JOptionPane.ERROR_MESSAGE);
+            return; // Exit the method to avoid further errors
+        }
+
         // Check for empty quantity field
         String quantityStr = quantityField.getText();
         if (quantityStr.isEmpty()) {
@@ -326,58 +337,47 @@ public class MedicineDetailsPage extends JFrame {
         }
 
         double pricePerUnit = Double.parseDouble(priceStr);
+        java.util.Date utilExpiryDate = expiryDateChooser.getDate();
+        java.sql.Date expiryDate = null;
 
-        // Check for empty expiry date field
-        String expiryDateStr = expiryDateField.getText();
-        if (expiryDateStr.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter an expiry date.", "Error", JOptionPane.ERROR_MESSAGE);
-            return; // Exit the method to avoid further errors
-        }
-
-        // Convert the date format from 'dd/MM/yyyy' to 'yyyy-MM-dd'
-        SimpleDateFormat inputFormat = new SimpleDateFormat("dd/MM/yyyy");
-
-        Date expiryDate;
-        try {
-            java.util.Date parsedDate = inputFormat.parse(expiryDateStr);
-            expiryDate = new java.sql.Date(parsedDate.getTime());
-
-            int newId = generateUniqueID(); // Call a method to generate a unique ID
-
-            // Check for duplicate medicine
-            if (isDuplicateMedicine(medicineName)) {
-                JOptionPane.showMessageDialog(this, "Duplicate medicine name found. Cannot add duplicate medicine.",
-                        "Error", JOptionPane.ERROR_MESSAGE);
-            } else {
-                // Insert the new medicine with the generated ID into the database
-                try (PreparedStatement insertStatement = connection.prepareStatement(
-                        "INSERT INTO medicine (id, medicine_name, company_name, category, quantity, price_per_unit, expiry_date, username) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")) {
-                    insertStatement.setInt(1, newId);
-                    insertStatement.setString(2, medicineName);
-                    insertStatement.setString(3, companyName);
-                    insertStatement.setString(4, category);
-                    insertStatement.setInt(5, quantity);
-                    insertStatement.setDouble(6, pricePerUnit);
-                    insertStatement.setDate(7, expiryDate);
-                    insertStatement.setString(8, LoginPage.loggedInUsername);
-
-                    insertStatement.executeUpdate();
-                    JOptionPane.showMessageDialog(this, "Medicine added successfully!", "Success",
-                            JOptionPane.INFORMATION_MESSAGE);
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                    JOptionPane.showMessageDialog(this, "Failed to add medicine.", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-            // Refresh the table after adding a new medicine
-            refreshTable();
-        } catch (ParseException ex) {
-            ex.printStackTrace();
-            // Handle the parse exception (invalid date format)
-            JOptionPane.showMessageDialog(this, "Invalid date format. Please use dd/MM/yyyy.", "Error",
+        if (utilExpiryDate != null) {
+            expiryDate = new java.sql.Date(utilExpiryDate.getTime());
+        } else {
+            JOptionPane.showMessageDialog(MedicineDetailsPage.this, "Please select a valid expiry date.", "Error",
                     JOptionPane.ERROR_MESSAGE);
             return;
         }
+
+        int newId = generateUniqueID(); // Call a method to generate a unique ID
+
+        // Check for duplicate medicine
+        if (isDuplicateMedicine(medicineName)) {
+            JOptionPane.showMessageDialog(this, "Duplicate medicine name found. Cannot add duplicate medicine.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
+        } else {
+            // Insert the new medicine with the generated ID into the database
+            try (PreparedStatement insertStatement = connection.prepareStatement(
+                    "INSERT INTO medicine (id, medicine_name, company_name, category, quantity, price_per_unit, expiry_date, username) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")) {
+                insertStatement.setInt(1, newId);
+                insertStatement.setString(2, medicineName);
+                insertStatement.setString(3, companyName);
+                insertStatement.setString(4, category);
+                insertStatement.setInt(5, quantity);
+                insertStatement.setDouble(6, pricePerUnit);
+                insertStatement.setTimestamp(7, new java.sql.Timestamp(expiryDate.getTime()));
+                insertStatement.setString(8, LoginPage.loggedInUsername);
+
+                insertStatement.executeUpdate();
+                JOptionPane.showMessageDialog(this, "Medicine added successfully!", "Success",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Failed to add medicine.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+        // Refresh the table after adding a new medicine
+        refreshTable();
+
     }
 
     private int generateUniqueID() {
@@ -404,6 +404,11 @@ public class MedicineDetailsPage extends JFrame {
         String companyName = companyComboBox.getSelectedItem().toString();
         String category = categoryComboBox.getSelectedItem().toString();
 
+        if (medicineName.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a medicine name.", "Error", JOptionPane.ERROR_MESSAGE);
+            return; // Exit the method to avoid further errors
+        }
+
         // Check for empty quantity field
         String quantityStr = quantityField.getText();
         if (quantityStr.isEmpty()) {
@@ -422,27 +427,16 @@ public class MedicineDetailsPage extends JFrame {
 
         double pricePerUnit = Double.parseDouble(priceStr);
 
-        // Check for empty expiry date field
-        String expiryDateStr = expiryDateField.getText();
-        if (expiryDateStr.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter an expiry date.", "Error", JOptionPane.ERROR_MESSAGE);
-            return; // Exit the method to avoid further errors
-        }
+        java.util.Date utilExpiryDate = expiryDateChooser.getDate();
 
-        // Convert the date format from 'dd/MM/yyyy' to 'yyyy-MM-dd'
-        SimpleDateFormat inputFormat = new SimpleDateFormat("dd/MM/yyyy");
-
-        Date expiryDate;
-        try {
-            java.util.Date parsedDate = inputFormat.parse(expiryDateStr);
-            expiryDate = new java.sql.Date(parsedDate.getTime());
-        } catch (ParseException ex) {
-            ex.printStackTrace();
-            // Handle the parse exception (invalid date format)
-            JOptionPane.showMessageDialog(this, "Invalid date format. Please use dd/MM/yyyy.", "Error",
+        // Validate date of birth
+        if (utilExpiryDate == null) {
+            JOptionPane.showMessageDialog(MedicineDetailsPage.this, "Please select a valid date of birth.", "Error",
                     JOptionPane.ERROR_MESSAGE);
             return;
         }
+
+        java.sql.Date expiryDate = new java.sql.Date(utilExpiryDate.getTime());
 
         try (PreparedStatement statement = connection.prepareStatement(
                 "UPDATE medicine SET medicine_name=?, company_name=?, category=?, quantity=?, price_per_unit=?, expiry_date=? WHERE id=? AND username=?")) {
@@ -451,7 +445,7 @@ public class MedicineDetailsPage extends JFrame {
             statement.setString(3, category);
             statement.setInt(4, quantity);
             statement.setDouble(5, pricePerUnit);
-            statement.setDate(6, expiryDate);
+            statement.setTimestamp(6, new java.sql.Timestamp(expiryDate.getTime()));
             statement.setInt(7, id);
             statement.setString(8, LoginPage.loggedInUsername);
 

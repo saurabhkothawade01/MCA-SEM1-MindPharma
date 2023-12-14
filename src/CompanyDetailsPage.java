@@ -7,6 +7,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CompanyDetailsPage extends JFrame {
     private JTextField idField, companyNameField, emailField, contactField, addressField;
@@ -93,7 +95,22 @@ public class CompanyDetailsPage extends JFrame {
                 String email = emailField.getText();
                 String contact = contactField.getText();
 
-                if (isDuplicateCompany(companyName)) {
+                if (!isValidEmail(email)) {
+                    JOptionPane.showMessageDialog(CompanyDetailsPage.this,
+                            "Invalid email format. Please enter a valid email address.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Validate contact number
+                else if (!isValidContactNumber(contact)) {
+                    JOptionPane.showMessageDialog(CompanyDetailsPage.this,
+                            "Invalid contact number. Please enter a 10-digit number.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                else if (isDuplicateCompany(companyName)) {
                     JOptionPane.showMessageDialog(CompanyDetailsPage.this,
                             "Duplicate company name.",
                             "Error", JOptionPane.ERROR_MESSAGE);
@@ -119,9 +136,27 @@ public class CompanyDetailsPage extends JFrame {
         updateButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                updateCompany();
-                refreshTable();
-                clearFields();
+                String email = emailField.getText();
+                String contact = contactField.getText();
+
+                if (!isValidEmail(email)) {
+                    JOptionPane.showMessageDialog(CompanyDetailsPage.this,
+                            "Invalid email format. Please enter a valid email address.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Validate contact number
+                else if (!isValidContactNumber(contact)) {
+                    JOptionPane.showMessageDialog(CompanyDetailsPage.this,
+                            "Invalid contact number. Please enter a 10-digit number.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                } else {
+                    updateCompany();
+                    refreshTable();
+                    clearFields();
+                }
             }
         });
 
@@ -414,6 +449,17 @@ public class CompanyDetailsPage extends JFrame {
         }
 
         companyTable.setModel(tableModel);
+    }
+
+    private boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
+    }
+
+    private boolean isValidContactNumber(String contactNumber) {
+        return contactNumber.matches("\\d{10}");
     }
 
     public static void main(String[] args) {

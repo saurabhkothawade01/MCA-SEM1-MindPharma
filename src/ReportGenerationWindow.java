@@ -1,5 +1,8 @@
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+
+import com.toedter.calendar.JDateChooser;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -168,47 +171,51 @@ public class ReportGenerationWindow extends JFrame {
 
     // DateRangeInputDialog class for obtaining date range input
     class DateRangeInputDialog extends JDialog {
-        private final JTextField startDateField;
-        private final JTextField endDateField;
+        // private final JTextField startDateField;
+        // private final JTextField endDateField;
+
+        private final JDateChooser startDateChooser;
+    private final JDateChooser endDateChooser;
+
         private boolean confirmed = false;
 
         public DateRangeInputDialog(JFrame parent, String title) {
             super(parent, title, true);
 
             setSize(300, 150);
-            setLocationRelativeTo(parent);
+        setLocationRelativeTo(parent);
 
-            startDateField = new JTextField();
-            endDateField = new JTextField();
+        startDateChooser = new JDateChooser();
+        endDateChooser = new JDateChooser();
 
-            JButton confirmButton = new JButton("Generate Report");
-            confirmButton.addActionListener(e -> {
-                confirmed = true;
-                dispose();
-            });
+        JButton confirmButton = new JButton("Generate Report");
+        confirmButton.addActionListener(e -> {
+            confirmed = true;
+            dispose();
+        });
 
-            JPanel inputPanel = new JPanel(new GridLayout(3, 2, 10, 10));
-            inputPanel.add(new JLabel("Start Date (MM/dd/yyyy):"));
-            inputPanel.add(startDateField);
-            inputPanel.add(new JLabel("End Date (MM/dd/yyyy):"));
-            inputPanel.add(endDateField);
-            inputPanel.add(new JLabel());
-            inputPanel.add(confirmButton);
+        JPanel inputPanel = new JPanel(new GridLayout(3, 2, 10, 10));
+        inputPanel.add(new JLabel("Start Date:"));
+        inputPanel.add(startDateChooser);
+        inputPanel.add(new JLabel("End Date:"));
+        inputPanel.add(endDateChooser);
+        inputPanel.add(new JLabel());
+        inputPanel.add(confirmButton);
 
-            add(inputPanel);
-        }
+        add(inputPanel);
+    }
 
-        public boolean isConfirmed() {
-            return confirmed;
-        }
+    public boolean isConfirmed() {
+        return confirmed;
+    }
 
-        public Date getStartDate() {
-            return parseDate(startDateField.getText());
-        }
+    public Date getStartDate() {
+        return startDateChooser.getDate();
+    }
 
-        public Date getEndDate() {
-            return parseDate(endDateField.getText());
-        }
+    public Date getEndDate() {
+        return endDateChooser.getDate();
+    }
 
         private Date parseDate(String dateString) {
             try {

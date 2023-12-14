@@ -207,18 +207,25 @@ public class SalesPage extends JFrame {
         String custname = customerNameField.getText();
         String contact = contactField.getText();
 
-        if (quantityStr.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter a quantity.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
         if (custname.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please enter a Customer Name.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
+        if (quantityStr.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a quantity.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         if (contact.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please enter a Contact.", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (!isValidContactNumber(contact)) {
+            JOptionPane.showMessageDialog(SalesPage.this,
+                    "Invalid contact number. Please enter a 10-digit number.",
+                    "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -588,6 +595,10 @@ public class SalesPage extends JFrame {
             e.printStackTrace();
             JOptionPane.showMessageDialog(this, "Failed to fetch sale details.", "Error", JOptionPane.ERROR_MESSAGE);
         }
+    }
+
+    private boolean isValidContactNumber(String contactNumber) {
+        return contactNumber.matches("\\d{10}");
     }
 
     public static void main(String[] args) {

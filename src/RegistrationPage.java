@@ -5,12 +5,14 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
+import com.toedter.calendar.JDateChooser;
 
 public class RegistrationPage extends JFrame {
 
@@ -21,7 +23,6 @@ public class RegistrationPage extends JFrame {
     private JTextField emailField;
     private JTextField contactNumberField;
     private JTextField addressField;
-    private JTextField dobField;
     private JComboBox<String> genderComboBox;
 
     public RegistrationPage() {
@@ -143,10 +144,12 @@ public class RegistrationPage extends JFrame {
         constraints.gridy = 8;
         panel.add(dobLabel, constraints);
 
-        dobField = new JTextField(20);
+        JDateChooser dobChooser = new JDateChooser();
+        dobChooser.setDateFormatString("dd/MM/yyyy");
+        dobChooser.setMaxSelectableDate(new Date());
         constraints.gridx = 1;
         constraints.gridy = 8;
-        panel.add(dobField, constraints);
+        panel.add(dobChooser, constraints);
 
         // Gender
         JLabel genderLabel = new JLabel("Gender:");
@@ -177,32 +180,35 @@ public class RegistrationPage extends JFrame {
                 String email = emailField.getText();
                 String contactNumber = contactNumberField.getText();
                 String address = addressField.getText();
-                String dobText = dobField.getText();
+                Date dobDate = dobChooser.getDate();
 
                 // Validate that username, password, and confirm password are not empty
                 if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty() || name.isEmpty()
-                        || email.isEmpty() || contactNumber.isEmpty() || address.isEmpty() || dobText.isEmpty()) {
+                        || email.isEmpty() || contactNumber.isEmpty() || address.isEmpty() || dobDate == null) {
                     JOptionPane.showMessageDialog(RegistrationPage.this, "Please entered all fields.", "Error",
                             JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                // Convert the date format from 'dd/MM/yyyy' to 'yyyy-MM-dd'
-                SimpleDateFormat inputFormat = new SimpleDateFormat("dd/MM/yyyy");
-                SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd");
-                Date dob = null;
-
-                try {
-                    dob = inputFormat.parse(dobText);
-                } catch (ParseException ex) {
-                    ex.printStackTrace();
-                    // Handle the parse exception (invalid date format)
-                    JOptionPane.showMessageDialog(RegistrationPage.this, "Invalid date format. Please use dd/MM/yyyy.",
+                // Validate email
+                if (!isValidEmail(email)) {
+                    JOptionPane.showMessageDialog(RegistrationPage.this,
+                            "Invalid email format. Please enter a valid email address.",
                             "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                String formattedDob = outputFormat.format(dob);
+                // Validate contact number
+                if (!isValidContactNumber(contactNumber)) {
+                    JOptionPane.showMessageDialog(RegistrationPage.this,
+                            "Invalid contact number. Please enter a 10-digit number.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd");
+                String formattedDob = outputFormat.format(dobDate);
+
                 String gender = (String) genderComboBox.getSelectedItem();
 
                 if (password.equals(confirmPassword)) {
@@ -216,15 +222,13 @@ public class RegistrationPage extends JFrame {
                         emailField.setText("");
                         contactNumberField.setText("");
                         addressField.setText("");
-                        dobField.setText("");
+                        // dobField.setText("");
+                        dobChooser.setDate(null);
 
                         // Open the login window
                         dispose();
                         LoginPage loginPage = new LoginPage();
                         loginPage.setVisible(true);
-                    } else {
-                        JOptionPane.showMessageDialog(RegistrationPage.this, "Registration failed. Please try again.",
-                                "Error", JOptionPane.ERROR_MESSAGE);
                     }
                 } else {
                     JOptionPane.showMessageDialog(RegistrationPage.this, "Passwords do not match. Please try again.",
@@ -369,6 +373,17 @@ public class RegistrationPage extends JFrame {
         }
 
         return false;
+    }
+
+    private boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
+    }
+
+    private boolean isValidContactNumber(String contactNumber) {
+        return contactNumber.matches("\\d{10}");
     }
 
     public static void main(String[] args) {
